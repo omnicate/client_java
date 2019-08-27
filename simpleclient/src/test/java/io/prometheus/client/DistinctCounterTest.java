@@ -61,15 +61,15 @@ public class DistinctCounterTest {
     observeN(counter, 100000, "two");
     assertEquals(200000.0, countMetric("nolabels", size), 2000.0);
     observeN(counter, 100000, "three");
-    assertEquals(300000.0, countMetric("nolabels", size), 3000.0);
+    assertEquals(300000.0, countMetric("nolabels", size), 15000.0);
   }
 
   @Test
   public void repeatedObservations() {
-    observeN(counter, 10000, "one");
-    assertEquals(10000.0, countMetric("nolabels", size), 150);
-    observeN(counter, 10000, "one");
-    assertEquals(10000.0, countMetric("nolabels", size), 150);
+    observeN(counter, 1000000, "one");
+    assertEquals(1000000.0, countMetric("nolabels", size), 15000);
+    observeN(counter, 1000000, "one");
+    assertEquals(1000000.0, countMetric("nolabels", size), 15000);
   }
 
   private double countMetric(String metricName, int size) {
