@@ -256,4 +256,34 @@ public class CollectorRegistry {
     return null;
   }
 
+  /**
+   * Returns the matching samples, using * as a label wildcard.
+   * <p>
+   * This is inefficient, and intended only for use in unittests.
+   * @return
+   */
+  public Map<Map<String, String>, Double> getSampleValues(String name, String[] labelNames, String[] labelValues) {
+    Map<Map<String, String>, Double> found = new HashMap<Map<String, String>, Double>();
+    for (Collector.MetricFamilySamples metricFamilySamples : Collections.list(metricFamilySamples())) {
+      for (Collector.MetricFamilySamples.Sample sample : metricFamilySamples.samples) {
+        if (sample.name.equals(name)
+                && Arrays.equals(sample.labelNames.toArray(), labelNames)) {
+          ArrayList<String> labelValuesCopy = new ArrayList(sample.labelValues);
+          for (int i = 0; i < labelValues.length; i++) {
+            if (labelValues[i].equals("*")) {
+              labelValuesCopy.set(i, "*");
+            }
+          }
+          if (Arrays.equals(labelValuesCopy.toArray(), labelValues)) {
+            Map<String, String> labels = new HashMap<String, String>(sample.labelValues.size());
+            for (int i = 0; i < sample.labelValues.size(); i++) {
+              labels.put(sample.labelNames.get(i), sample.labelValues.get(i));
+            }
+            found.put(labels, sample.value);
+          }
+        }
+      }
+    }
+    return found;
+  }
 }
