@@ -21,13 +21,13 @@ public class DistinctCounterTest {
     counter = DistinctCounter.build().name("nolabels").help("help").logSize(logSize).register(registry);
   }
 
-  private double[] getValue(String metricName, int size) {
-    double[] buckets = new double[size];
+  private byte[] getValue(String metricName, int size) {
+    byte[] buckets = new byte[size];
     Map<Map<String, String>, Double> metrics
             = registry.getSampleValues(metricName, new String[]{"m"}, new String[]{"*"});
     for (Map.Entry<Map<String, String>, Double> metric : metrics.entrySet()) {
       String m = metric.getKey().get("m");
-      buckets[Integer.parseInt(m)] = metric.getValue();
+      buckets[Integer.parseInt(m)] = (byte) Math.round(metric.getValue());
     }
     return buckets;
   }
@@ -56,12 +56,12 @@ public class DistinctCounterTest {
 
   @Test
   public void denseObservations() {
-    observeN(counter, 10000, "one");
-    assertEquals(10000.0, countMetric("nolabels", size), 150);
-    observeN(counter, 10000, "two");
-    assertEquals(20000.0, countMetric("nolabels", size), 200);
-    observeN(counter, 10000, "three");
-    assertEquals(30000.0, countMetric("nolabels", size), 300);
+    observeN(counter, 100000, "one");
+    assertEquals(100000.0, countMetric("nolabels", size), 1000.0);
+    observeN(counter, 100000, "two");
+    assertEquals(200000.0, countMetric("nolabels", size), 2000.0);
+    observeN(counter, 100000, "three");
+    assertEquals(300000.0, countMetric("nolabels", size), 3000.0);
   }
 
   @Test
@@ -73,11 +73,11 @@ public class DistinctCounterTest {
   }
 
   private double countMetric(String metricName, int size) {
-    double[] buckets = getValue(metricName, size);
+    byte[] buckets = getValue(metricName, size);
     return count(buckets);
   }
 
-  private double count(double[] buckets) {
+  private double count(byte[] buckets) {
     int v = countZeroes(buckets);
     if (v > 0) {
       return buckets.length * Math.log((1.0 * buckets.length) / v);
@@ -87,7 +87,7 @@ public class DistinctCounterTest {
     return am * buckets.length * mZ;
   }
 
-  private int countZeroes(double[] buckets) {
+  private int countZeroes(byte[] buckets) {
     int v = 0;
     for (int i = 0; i < buckets.length; i++) {
       if (buckets[i] == 0) {
@@ -111,10 +111,10 @@ public class DistinctCounterTest {
     }
   }
 
-  private static double arithmeticMean(double[] buckets) {
+  private static double arithmeticMean(byte[] buckets) {
     double mean = 0;
-    for (double b : buckets) {
-      mean += 1.0 / Math.pow(2, b);
+    for (byte b : buckets) {
+      mean += Math.pow(2, -b);
     }
     return buckets.length / mean;
   }

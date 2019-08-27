@@ -144,7 +144,7 @@ public class DistinctCounter extends SimpleCollector<DistinctCounter.Child> impl
       //long hashBits = (-1 >>> logSize) & hash;
       int indexBits = (int)(hash & ((1 << logSize) - 1));
       long hashBits = hash >>> logSize;
-      byte leadingZeroes = (byte) Long.numberOfLeadingZeros(hashBits);
+      byte leadingZeroes = (byte) (Long.numberOfTrailingZeros(hashBits) + 1);
       buckets.incrementMax(indexBits, leadingZeroes);
     }
 
